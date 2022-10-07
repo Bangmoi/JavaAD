@@ -20,6 +20,13 @@ import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import net.sourceforge.jtds.jdbc.DateTime;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  *
@@ -745,10 +752,239 @@ public class FormBill extends javax.swing.JFrame {
     }//GEN-LAST:event_btnDeleteActionPerformed
 
     private void btnExportDataActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportDataActionPerformed
-
+        
+        DefaultTableModel model = new DefaultTableModel();
+        model = (DefaultTableModel) tbSP.getModel();
+        String date = null;
+        try {
+            SimpleDateFormat dcn = new SimpleDateFormat("dd/MM/yyyy");
+            date = dcn.format(dateBill.getDate());
+        } catch (Exception e) {
+        }
+        long tongtien=0;
+        String tmpString = "\n"
+                + "\n" + "\n" + "\n"
+                + "*********************************************************************************************\n"
+                + "\t CỬA HÀNG                                    HÓA ĐƠN THANH TOÁN                 \n"
+                + "\t LAPTOP 123                                    Ngày: "+date+" \n"
+                + "                                                 Mã hóa đơn: "+txtMaHD.getText()+"\n"
+                + "	(DC: Đại học Hạ Long cơ sở 1)                                                           \n"
+                + "                                                                                             \n"
+                + "---------------------------------------------------------------------------------------------\n"
+                + "	Họ tên khách hàng: "+txtName.getText()+"\n"
+                + "	Số điện thoại: "+txtPhone.getText()+"\n"
+                + "	Địa chỉ: "+txtAdess.getText()+"\n"
+                + "	Ghi chú của khách hàng:	"+txtGhichu.getText()+"\n"
+                + "			          				\n"
+                + "	                               Danh sách sản phẩm mua	   	          	        \n"
+                + "**********************************************************************************************\n"
+                + " STT" + "\t" + "Tên SP" + "\t" + "Số lượng" + "\t" + "Giá" + "\t" + "% CK" + "\t" + "Tổng" + "\n"
+                + "**********************************************************************************************\n";
+                int stt=0;
+               for (int i = 0; i < model.getRowCount(); i++) {
+                    stt += 1;
+                    String name = tbSP.getModel().getValueAt(i, 2).toString();
+                    String sl = tbSP.getModel().getValueAt(i, 4).toString();
+                    String gia = tbSP.getModel().getValueAt(i, 5).toString();
+                    String ck = tbSP.getModel().getValueAt(i, 6).toString();
+                    String tong = tbSP.getModel().getValueAt(i, 7).toString();
+                    tongtien+=Double.parseDouble(tong);
+                    tmpString+=stt+"\t"+name+"\t"+sl+"\t"+gia+"\t"+ck+"\t"+tong+"\n";
+               };
+                System.out.println(tongtien);
+               String tongtienchu=numberToString(tongtien);
+               
+                tmpString+= "			          				\n"
+                + "			          				\n"
+                + "**********************************************************************************************\n"
+                + "\n"
+                + "   Tổng tiền: "+tongtien+"\n"
+                + "   Thanh toán: "+tongtien+"\n"
+                + "   Hình thức thanh toán: "+cbbPayment.getSelectedItem()+"\n"
+                + "   Số tiền viết bằng chữ:("+tongtienchu+").\n"
+                + "\n"
+                + "                                ĐÃ THANH TOÁN THÀNH CÔNG\n"
+                + "**********************************************************************************************\n"
+                + "			          				\n"
+                + "      Người mua hàng                                            Người bán hàng		\n"
+                + "    (Ký, ghi rõ họ, tên)                                      (Ký, ghi rõ họ, tên)		\n"
+                + "\n"
+                + "\n"
+                + "\n"
+                + "\n"
+                + "\n"
+                + "**********************************************************************************************\n"
+                + "                             XIN TRÂN TRONG CẢM ƠN QUÝ KHÁCH!  				\n"
+                + "**********************************************************************************************\n";
+                frmPreviewBill pr = new frmPreviewBill(tmpString);
+                pr.setVisible(true);
+                
         //exportExcel(tbNV);
     }//GEN-LAST:event_btnExportDataActionPerformed
+    public static String formatNumberForRead(double number) {
+        NumberFormat nf = NumberFormat.getInstance();
+        String temp = nf.format(number);
+        String strReturn = "";
+        int slen = temp.length();
+        for (int i = 0; i < slen; i++) {
+            if (String.valueOf(temp.charAt(i)).equals("."))
+                break;
+            else if (Character.isDigit(temp.charAt(i))) {
+                strReturn += String.valueOf(temp.charAt(i));
+            }
+        }
+        return strReturn;
 
+    }
+    public static String numberToString(double number) {
+        String sNumber = formatNumberForRead(number);
+        // Tao mot bien tra ve
+        String sReturn = "";
+        // Tim chieu dai cua chuoi
+        int iLen = sNumber.length();
+        // Lat nguoc chuoi nay lai
+        String sNumber1 = "";
+        for (int i = iLen - 1; i >= 0; i--) {
+            sNumber1 += sNumber.charAt(i);
+        }
+        // Tao mot vong lap de doc so
+        // Tao mot bien nho vi tri cua sNumber
+        int iRe = 0;
+        do {
+            // Tao mot bien cat tam
+            String sCut = "";
+            if (iLen > 3) {
+                sCut = sNumber1.substring((iRe * 3), (iRe * 3) + 3);
+                sReturn = Read(sCut, iRe) + sReturn;
+                iRe++;
+                iLen -= 3;
+            } else {
+                sCut = sNumber1.substring((iRe * 3), (iRe * 3) + iLen);
+                sReturn = Read(sCut, iRe) + sReturn;
+                break;
+            }
+        } while (true);
+        if(sReturn.length() > 1){
+            sReturn = sReturn.substring(0,1).toUpperCase() + sReturn.substring(1);
+        }
+        sReturn = sReturn + "đồng";
+        return sReturn;
+    }
+
+    // Khoi tao ham Read
+    public static String Read(String sNumber, int iPo) {
+        // Tao mot bien tra ve
+        String sReturn = "";
+        // Tao mot bien so
+        String sPo[] = { "", "ngàn" + " ",
+                "triệu" + " ", "tỷ" + " " };
+        String sSo[] = { "không" + " ", "một" + " ",
+                "hai" + " ", "ba" + " ",
+                "bốn" + " ", "năm" + " ",
+                "sáu" + " ", "bảy" + " ",
+                "tám" + " ", "chín" + " " };
+        String sDonvi[] = { "", "mươi" + " ",
+                "trăm" + " " };
+        // Tim chieu dai cua chuoi
+        int iLen = sNumber.length();
+        // Tao mot bien nho vi tri doc
+        int iRe = 0;
+        // Tao mot vong lap de doc so
+        for (int i = 0; i < iLen; i++) {
+            String sTemp = "" + sNumber.charAt(i);
+            int iTemp = Integer.parseInt(sTemp);
+            // Tao mot bien ket qua
+            String sRead = "";
+            // Kiem tra xem so nhan vao co = 0 hay ko
+            if (iTemp == 0) {
+                switch (iRe) {
+                case 0:
+                    break;// Khong lam gi ca
+                case 1: {
+                    if (Integer.parseInt("" + sNumber.charAt(0)) != 0) {
+                        sRead = "lẻ" + " ";
+                    }
+                    break;
+                }
+                case 2: {
+                    if (Integer.parseInt("" + sNumber.charAt(0)) != 0
+                            && Integer.parseInt("" + sNumber.charAt(1)) != 0) {
+                        sRead = "không trăm" + " ";
+                    }
+                    break;
+                }
+                }
+            } else if (iTemp == 1) {
+                switch (iRe) {
+                case 1:
+                    sRead = "mười" + " ";
+                    break;
+                default:
+                    sRead = "một" + " " + sDonvi[iRe];
+                    break;
+                }
+            } else if (iTemp == 5) {
+                switch (iRe) {
+                case 0: {
+                    if(sNumber.length() <= 1){
+                        sRead = "năm" + " ";
+                    }
+                    else if (Integer.parseInt("" + sNumber.charAt(1)) != 0) {
+                        sRead = "lăm" + " ";
+                    } else
+                        sRead = "năm" + " ";
+                    break;
+                }
+                default:
+                    sRead = sSo[iTemp] + sDonvi[iRe];
+                }
+            } else {
+                sRead = sSo[iTemp] + sDonvi[iRe];
+            }
+
+            sReturn = sRead + sReturn;
+            iRe++;
+        }
+        if (sReturn.length() > 0) {
+            sReturn += sPo[iPo];
+        }
+
+        return sReturn;
+    }
+
+    public static String getRomanNumerals(int Int) {
+        LinkedHashMap<String, Integer> roman_numerals = new LinkedHashMap<String, Integer>();
+        roman_numerals.put("M", 1000);
+        roman_numerals.put("CM", 900);
+        roman_numerals.put("D", 500);
+        roman_numerals.put("CD", 400);
+        roman_numerals.put("C", 100);
+        roman_numerals.put("XC", 90);
+        roman_numerals.put("L", 50);
+        roman_numerals.put("XL", 40);
+        roman_numerals.put("X", 10);
+        roman_numerals.put("IX", 9);
+        roman_numerals.put("V", 5);
+        roman_numerals.put("IV", 4);
+        roman_numerals.put("I", 1);
+        String res = "";
+        for(Map.Entry<String, Integer> entry : roman_numerals.entrySet()){
+          int matches = Int/entry.getValue();
+          res += repeat(entry.getKey(), matches);
+          Int = Int % entry.getValue();
+        }
+        return res;
+  }
+    public static String repeat(String s, int n) {
+    if(s == null) {
+        return null;
+    }
+    final StringBuilder sb = new StringBuilder();
+    for(int i = 0; i < n; i++) {
+        sb.append(s);
+    }
+    return sb.toString();
+  }
     private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
         txtName.setText(null);
         txtPhone.setText(null);
