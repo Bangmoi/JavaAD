@@ -4,12 +4,24 @@
  */
 package quanly;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
+
 /**
  *
  * @author Admin
  */
 public class frmPreviewBill extends javax.swing.JFrame {
-
+    Vector MLT;
+    Vector SLB;
+    String maString;
     /**
      * Creates new form frmPreviewBill
      */
@@ -101,6 +113,25 @@ public class frmPreviewBill extends javax.swing.JFrame {
     private void btnPrintActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPrintActionPerformed
         try {
             txtPriewBill.print();
+            Connection c = ConnectDB.getSQLServerConnection();
+            Statement s = c.createStatement();
+            int a=0;
+        try {
+            for (int i = 0; i < MLT.size(); i++) {
+                String sqlString = String.format("UPDATE tbl_KhoHang SET iSoLuongBan=(SELECT SUM(iSoLuongBan)+%s FROM tbl_KhoHang WHERE sMaLaptop=N'%s'), iTonKho=(SELECT SUM(iSoLuongNhap-iSoLuongBan)-%s FROM tbl_KhoHang WHERE sMaLaptop='%s') WHERE sMaLaptop='%s'",SLB.get(i),MLT.get(i),SLB.get(i),MLT.get(i),MLT.get(i));
+                a = s.executeUpdate(sqlString);
+            }
+            String sqlString = String.format("UPDATE tbl_HoaDon SET sStatus='Đã thanh toán' WHERE sMaHD='%s'",maString);
+            s.executeUpdate(sqlString);
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        System.out.println(a);
+        if(a>0){
+            JOptionPane.showMessageDialog(null, "Xuất hoá đơn thành công","Thông báo", 1);
+        }
+        else JOptionPane.showMessageDialog(null, "Xuất hoá đơn thất bại","Thông báo", 1);
         } catch (Exception e) {
         }
         

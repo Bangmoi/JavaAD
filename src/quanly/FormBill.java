@@ -36,6 +36,8 @@ public class FormBill extends javax.swing.JFrame {
 
     private String textString;
     private String SLK;
+    Vector MLT=new Vector();
+    Vector SLB=new Vector();
     /**
      * Creates new form FormBill
      */
@@ -783,8 +785,10 @@ public class FormBill extends javax.swing.JFrame {
                 int stt=0;
                for (int i = 0; i < model.getRowCount(); i++) {
                     stt += 1;
+                    MLT.add(tbSP.getModel().getValueAt(i, 1).toString());
                     String name = tbSP.getModel().getValueAt(i, 2).toString();
                     String sl = tbSP.getModel().getValueAt(i, 4).toString();
+                    SLB.add(tbSP.getModel().getValueAt(i, 4).toString());
                     String gia = tbSP.getModel().getValueAt(i, 5).toString();
                     String ck = tbSP.getModel().getValueAt(i, 6).toString();
                     String tong = tbSP.getModel().getValueAt(i, 7).toString();
@@ -801,7 +805,7 @@ public class FormBill extends javax.swing.JFrame {
                 + "   Tổng tiền: "+tongtien+"\n"
                 + "   Thanh toán: "+tongtien+"\n"
                 + "   Hình thức thanh toán: "+cbbPayment.getSelectedItem()+"\n"
-                + "   Số tiền viết bằng chữ:("+tongtienchu+").\n"
+                + "   Số tiền viết bằng chữ: ("+tongtienchu+").\n"
                 + "\n"
                 + "                                ĐÃ THANH TOÁN THÀNH CÔNG\n"
                 + "**********************************************************************************************\n"
@@ -816,7 +820,13 @@ public class FormBill extends javax.swing.JFrame {
                 + "**********************************************************************************************\n"
                 + "                             XIN TRÂN TRONG CẢM ƠN QUÝ KHÁCH!  				\n"
                 + "**********************************************************************************************\n";
+                for (int i = 0; i < MLT.size(); i++) {
+                System.out.println("xxxxxxxxxxx"+MLT.size());
+            }
                 frmPreviewBill pr = new frmPreviewBill(tmpString);
+                pr.MLT=MLT;
+                pr.SLB=SLB;
+                pr.maString=txtMaHD.getText();
                 pr.setVisible(true);
                 
         //exportExcel(tbNV);
