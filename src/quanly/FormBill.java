@@ -823,6 +823,15 @@ public class FormBill extends javax.swing.JFrame {
                 for (int i = 0; i < MLT.size(); i++) {
                 System.out.println("xxxxxxxxxxx"+MLT.size());
             }
+        try {
+            Connection c = ConnectDB.getSQLServerConnection();
+            Statement s = c.createStatement();
+            s = c.createStatement();
+            String sqlString = String.format("UPDATE tbl_HoaDon SET iTongTien = '%s' WHERE sMaHD='%s'",tongtien,txtMaHD.getText());
+            s.executeUpdate(sqlString);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
                 frmPreviewBill pr = new frmPreviewBill(tmpString);
                 pr.MLT=MLT;
                 pr.SLB=SLB;
